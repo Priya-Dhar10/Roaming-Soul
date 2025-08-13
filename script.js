@@ -104,19 +104,53 @@
   if (lottieLoader) {
     window.addEventListener('load', () => {
       setTimeout(()=> { lottieLoader.classList.add('hide'); }, 400); // small delay for polish
-      setTimeout(()=> { lottieLoader.remove(); }, 1400);
+      setTimeout(()=> { lottieLoader.remove(); startHeroAnimations(); }, 1400);
     });
     // Fallback auto-hide after 7s if load event delayed
-    setTimeout(()=> { if(lottieLoader && !lottieLoader.classList.contains('hide')) { lottieLoader.classList.add('hide'); setTimeout(()=> lottieLoader.remove(), 1000); } }, 7000);
+    setTimeout(()=> { if(lottieLoader && !lottieLoader.classList.contains('hide')) { lottieLoader.classList.add('hide'); setTimeout(()=> { lottieLoader.remove(); startHeroAnimations(); }, 1000); } }, 7000);
   }
+  else {
+    // If there is no loader overlay, start animations when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startHeroAnimations);
+    } else {
+      startHeroAnimations();
+    }
+  }
+
+  /* ===== Hero Title Zoom + Subtitle Typing ===== */
+  function startHeroAnimations(){
+    const titleEl = doc.querySelector('.hero-title');
+    const subEl = doc.querySelector('.hero-subtitle');
+    if(titleEl){
+      // ensure starting state
+      titleEl.classList.remove('animate-zoom');
+      void titleEl.offsetWidth; // reflow for restart safety
+      titleEl.classList.add('animate-zoom');
+    }
+    if(subEl){
+      // Disable typing: ensure subtitle is visible and static
+      const fullText = subEl.getAttribute('data-fulltext') || subEl.textContent.trim();
+      subEl.textContent = fullText;
+      subEl.classList.remove('typing','done');
+      subEl.style.opacity='1';
+      subEl.style.visibility='visible';
+      subEl.style.animation='none';
+      subEl.style.borderRight='none';
+    }
+  }
+
+  // Typing disabled: leaving function stub in case re-enabled later
+  function typeText(){ /* disabled */ }
 
   /* ===== Navbar style change on About section ===== */
   const navbar = doc.querySelector('.navbar');
   const aboutSection = doc.getElementById('about');
   if (navbar && aboutSection) {
-    const threshold = () => aboutSection.offsetTop - 20; // trigger close to section start
+    const threshold = () => aboutSection.offsetTop - 20;
     const onScrollNav = () => {
-      if (window.scrollY >= threshold()) navbar.classList.add('white'); else navbar.classList.remove('white');
+      if (window.scrollY >= threshold()) navbar.classList.add('white');
+      else navbar.classList.remove('white');
     };
     window.addEventListener('scroll', onScrollNav, { passive: true });
     window.addEventListener('resize', onScrollNav);
